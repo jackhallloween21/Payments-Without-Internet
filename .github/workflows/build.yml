@@ -172,18 +172,24 @@ jobs:
             exit 1
           fi
 
-      # No debug APK is uploaded. On a public repository every Actions
-      # artifact is world-downloadable, and this one would be the most
-      # authentic-looking Flowpay build in existence — produced by the
-      # project's own CI. It is also the most dangerous one to install:
-      # `android:debuggable=true` exposes the SQLCipher database and the key
-      # prefs to `adb run-as`, it carries `DebugSmsInjectionReceiver`
-      # exported with no permission (so any zero-permission app on the phone
-      # can fake a "Payment Successful" screen and a SUCCESS row), and it is
-      # signed with the public Android debug key, so anyone can trojan it and
-      # ship an in-place upgrade. SECURITY.md tells readers no Flowpay APK is
-      # published anywhere; publishing one here would make that guidance
-      # actively harmful. The build below still proves the app compiles.
+      # NOTE: Original project deliberately did NOT upload the debug APK for
+      # security reasons (debuggable=true, public debug key, DebugSmsInjectionReceiver).
+      # Upload enabled here on repo owner's request to get APK from CI.
+      # See SECURITY.md — do not distribute this debug build as a release.
+
+      - name: Upload debug APK
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+        with:
+          name: app-debug
+          path: app/build/outputs/apk/debug/*.apk
+          retention-days: 14
+
+      - name: Upload release APK (unsigned)
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+        with:
+          name: app-release-unsigned
+          path: app/build/outputs/apk/release/*.apk
+          retention-days: 14
 
       - name: Upload lint report
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
